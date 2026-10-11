@@ -1,8 +1,8 @@
 """Machine-readable CI reports."""
 
 import json
-from html import escape
 from dataclasses import asdict
+from html import escape
 from pathlib import Path
 from xml.etree.ElementTree import Element, ElementTree, SubElement
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -22,7 +22,7 @@ def save_run(results: list[Result], db: Path | None = None) -> str:
     run_id = uuid4().hex[:12]
     with sqlite3.connect(path) as conn:
         conn.execute("CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, results TEXT NOT NULL)")
-        conn.execute("INSERT INTO runs VALUES (?, ?, ?)", (run_id, datetime.now(timezone.utc).isoformat(), json.dumps([asdict(r) for r in results])))
+        conn.execute("INSERT INTO runs VALUES (?, ?, ?)", (run_id, datetime.now(UTC).isoformat(), json.dumps([asdict(r) for r in results])))
     return run_id
 
 

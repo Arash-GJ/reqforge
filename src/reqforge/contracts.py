@@ -16,7 +16,7 @@ def load_contract(path: Path) -> dict:
     if not isinstance(data, dict) or not str(data.get("openapi", "")).startswith("3."):
         raise ValueError("Expected an OpenAPI 3.x document")
     if not isinstance(data.get("paths"), dict):
-        raise ValueError("OpenAPI document requires paths")
+        raise TypeError("OpenAPI document requires paths")
     return data
 
 

@@ -8,7 +8,6 @@ from typer.testing import CliRunner
 from reqforge.cli import app
 from reqforge.contracts import load_contract, validate_response
 
-
 EXAMPLE_CONTRACT = Path(__file__).resolve().parents[1] / "examples" / "openapi.yaml"
 
 
