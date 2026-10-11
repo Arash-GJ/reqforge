@@ -18,6 +18,7 @@ app = typer.Typer(
     help="ReqForge: API requests and asynchronous YAML test suites.", no_args_is_help=True
 )
 console = Console()
+error_console = Console(stderr=True)
 
 
 @app.command()
@@ -66,7 +67,7 @@ def send(
         if response.is_error:
             raise typer.Exit(code=1)
     except (httpx.HTTPError, ValueError) as exc:
-        console.print(f"[red]Request failed:[/red] {exc}", stderr=True)
+        error_console.print(f"[red]Request failed:[/red] {exc}")
         raise typer.Exit(code=2) from exc
 
 
@@ -102,7 +103,7 @@ def run(
         if report:
             save_report(results, report, format)
     except (ValueError, OSError) as exc:
-        console.print(f"[red]Suite error:[/red] {exc}", stderr=True)
+        error_console.print(f"[red]Suite error:[/red] {exc}")
         raise typer.Exit(code=2) from exc
     table = Table("Test", "Status", "HTTP", "Duration", "Details")
     for result in results:
