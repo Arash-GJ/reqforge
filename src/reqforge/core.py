@@ -36,11 +36,11 @@ def load_suite(path: Path) -> list[Case]:
     """Parse an explicitly trusted local suite. Never interpolate or execute YAML."""
     content = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(content, dict) or not isinstance(content.get("tests"), list):
-        raise ValueError("Suite must contain a 'tests' list")
+        raise TypeError("Suite must contain a 'tests' list")
     cases = []
     for index, raw in enumerate(content["tests"], 1):
         if not isinstance(raw, dict):
-            raise ValueError(f"Test #{index} must be a mapping")
+            raise TypeError(f"Test #{index} must be a mapping")
         try:
             url = raw["url"]
             if not isinstance(url, str) or not url.startswith(("http://", "https://")):

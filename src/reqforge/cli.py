@@ -3,7 +3,7 @@
 import asyncio
 import json
 from pathlib import Path
-
+from typing import Annotated
 import httpx
 import typer
 from rich.console import Console
@@ -27,11 +27,20 @@ def version() -> None:
 
 @app.command()
 def send(
-    method: str = typer.Argument(..., help="HTTP method"),
-    url: str = typer.Argument(..., help="Absolute HTTP(S) URL"),
-    header: list[str] | None = typer.Option(None, "--header", "-H", help="Header: Name: Value"),
-    body: str | None = typer.Option(None, "--json", help="JSON request body"),
-    timeout: float = typer.Option(15.0, min=0.1),
+    method: Annotated[str, typer.Argument(help="HTTP method")],
+    url: Annotated[str, typer.Argument(help="Absolute HTTP(S) URL")],
+    header: Annotated[
+        list[str] | None,
+        typer.Option("--header", "-H", help="Header: Name: Value"),
+    ] = None,
+    body: Annotated[
+        str | None,
+        typer.Option("--json", help="JSON request body"),
+    ] = None,
+    timeout: Annotated[
+        float,
+        typer.Option(min=0.1),
+    ] = 15.0,
 ) -> None:
     """Send one HTTP request and print its response."""
     if not url.startswith(("http://", "https://")):
@@ -62,11 +71,26 @@ def send(
 
 @app.command()
 def run(
-    suite: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
-    parallel: int = typer.Option(5, min=1, max=100),
-    timeout: float = typer.Option(15.0, min=0.1),
-    report: Path | None = typer.Option(None, help="Report output path"),
-    format: str = typer.Option("json", help="Report format: json or junit"),
+    suite: Annotated[
+        Path,
+        typer.Argument(exists=True, dir_okay=False, readable=True),
+    ],
+    parallel: Annotated[
+        int,
+        typer.Option(min=1, max=100),
+    ] = 5,
+    timeout: Annotated[
+        float,
+        typer.Option(min=0.1),
+    ] = 15.0,
+    report: Annotated[
+        Path | None,
+        typer.Option(help="Report output path"),
+    ] = None,
+    format: Annotated[
+        str,
+        typer.Option(help="Report format: json or junit"),
+    ] = "json",
 ) -> None:
     """Execute YAML API tests and return a CI-friendly exit code."""
     if format not in ("json", "junit"):
