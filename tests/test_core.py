@@ -28,9 +28,16 @@ def test_reject_bad_suite(tmp_path):
 async def test_run_suite_success_and_failure():
     def handler(request):
         return httpx.Response(200, json={"data": {"id": 3}}, headers={"x-service": "demo"})
+
     transport = httpx.MockTransport(handler)
     cases = [
-        Case("pass", "GET", "https://example.com", expected_json={"data.id": 3}, expected_headers={"x-service": "demo"}),
+        Case(
+            "pass",
+            "GET",
+            "https://example.com",
+            expected_json={"data.id": 3},
+            expected_headers={"x-service": "demo"},
+        ),
         Case("fail", "GET", "https://example.com", expected_status=404),
     ]
     results = await run_suite(cases, transport=transport)
@@ -40,6 +47,7 @@ async def test_run_suite_success_and_failure():
 
 def test_reports(tmp_path):
     from reqforge.core import Result
+
     results = [Result("ok", True, 200, 12), Result("bad", False, 500, 13, "oops")]
     save_report(results, tmp_path / "results.json", "json")
     save_report(results, tmp_path / "results.xml", "junit")

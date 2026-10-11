@@ -1,4 +1,5 @@
 """Machine-readable CI reports."""
+
 import json
 from dataclasses import asdict
 from pathlib import Path
@@ -12,9 +13,13 @@ def save_report(results: list[Result], path: Path, fmt: str) -> None:
     if fmt == "json":
         path.write_text(json.dumps([asdict(r) for r in results], indent=2), encoding="utf-8")
     elif fmt == "junit":
-        root = Element("testsuite", tests=str(len(results)), failures=str(sum(not r.passed for r in results)))
+        root = Element(
+            "testsuite", tests=str(len(results)), failures=str(sum(not r.passed for r in results))
+        )
         for result in results:
-            case = SubElement(root, "testcase", name=result.name, time=f"{result.duration_ms / 1000:.4f}")
+            case = SubElement(
+                root, "testcase", name=result.name, time=f"{result.duration_ms / 1000:.4f}"
+            )
             if not result.passed:
                 SubElement(case, "failure", message=result.error or "failed")
         ElementTree(root).write(path, encoding="utf-8", xml_declaration=True)

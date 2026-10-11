@@ -1,4 +1,5 @@
 """Terminal interface for ReqForge."""
+
 import asyncio
 import json
 from pathlib import Path
@@ -12,7 +13,9 @@ from . import __version__
 from .core import load_suite, run_suite
 from .reporting import save_report
 
-app = typer.Typer(help="ReqForge: API requests and asynchronous YAML test suites.", no_args_is_help=True)
+app = typer.Typer(
+    help="ReqForge: API requests and asynchronous YAML test suites.", no_args_is_help=True
+)
 console = Console()
 
 
@@ -43,7 +46,9 @@ def send(
         payload = json.loads(body) if body is not None else None
         with httpx.Client(timeout=timeout, follow_redirects=False) as client:
             response = client.request(method.upper(), url, headers=headers, json=payload)
-        console.print(f"[bold]HTTP {response.status_code}[/bold] ({response.elapsed.total_seconds()*1000:.0f} ms)")
+        console.print(
+            f"[bold]HTTP {response.status_code}[/bold] ({response.elapsed.total_seconds() * 1000:.0f} ms)"
+        )
         try:
             console.print_json(data=response.json())
         except ValueError:
@@ -76,8 +81,13 @@ def run(
         raise typer.Exit(code=2) from exc
     table = Table("Test", "Status", "HTTP", "Duration", "Details")
     for result in results:
-        table.add_row(result.name, "PASS" if result.passed else "FAIL", str(result.status or "-"),
-                      f"{result.duration_ms:.0f} ms", result.error or "")
+        table.add_row(
+            result.name,
+            "PASS" if result.passed else "FAIL",
+            str(result.status or "-"),
+            f"{result.duration_ms:.0f} ms",
+            result.error or "",
+        )
     console.print(table)
     failed = sum(not result.passed for result in results)
     console.print(f"{len(results) - failed}/{len(results)} passed")
