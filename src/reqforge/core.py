@@ -52,19 +52,13 @@ def load_suite(path: Path) -> list[Case]:
             expected_headers = raw.get("expect_headers", {})
             headers = raw.get("headers", {})
             if not all(isinstance(x, dict) for x in (expected_json, expected_headers, headers)):
-                raise ValueError("headers, expect_headers and expect_json must be mappings")
-            cases.append(
-                Case(
-                    name=str(raw.get("name", f"test-{index}")),
-                    method=method,
-                    url=url,
-                    expected_status=int(raw.get("expect_status", 200)),
-                    headers=headers,
-                    json_body=raw.get("json"),
-                    expected_json=expected_json,
-                    expected_headers=expected_headers,
-                )
-            )
+                raise TypeError("headers, expect_headers and expect_json must be mappings")
+            cases.append(Case(
+                name=str(raw.get("name", f"test-{index}")), method=method, url=url,
+                expected_status=int(raw.get("expect_status", 200)), headers=headers,
+                json_body=raw.get("json"), expected_json=expected_json,
+                expected_headers=expected_headers,
+            ))
         except (KeyError, TypeError, ValueError) as exc:
             raise ValueError(f"Invalid test #{index}: {exc}") from exc
     return cases
@@ -82,9 +76,8 @@ def nested_value(data: Any, dotted_path: str) -> Any:
     return current
 
 
-async def execute_case(case: Case, client: httpx.AsyncClient) -> Result:
+async def execute_case(case: Case, client: httpx.AsyncClient, contract: dict | None = None) -> Result:
     import time
-
     started = time.perf_counter()
     status = None
     try:
@@ -92,6 +85,11 @@ async def execute_case(case: Case, client: httpx.AsyncClient) -> Result:
             case.method, case.url, headers=case.headers, json=case.json_body
         )
         status = response.status_code
+        if contract is not None:
+            from .contracts import validate_response
+            violations = validate_response(contract, case.method, case.url, response)
+            if violations:
+                raise AssertionError("OpenAPI: " + "; ".join(violations))
         if status != case.expected_status:
             raise AssertionError(f"Expected HTTP {case.expected_status}, got {status}")
         for header, expected in case.expected_headers.items():
@@ -113,20 +111,15 @@ async def execute_case(case: Case, client: httpx.AsyncClient) -> Result:
 
 
 async def run_suite(
-    cases: list[Case],
-    parallel: int = 5,
-    timeout: float = 15,
+    cases: list[Case], parallel: int = 5, timeout: float = 15,
     transport: httpx.AsyncBaseTransport | None = None,
+    contract: dict | None = None,
 ) -> list[Result]:
     if parallel < 1 or timeout <= 0:
         raise ValueError("parallel and timeout must be positive")
     semaphore = asyncio.Semaphore(parallel)
-    async with httpx.AsyncClient(
-        timeout=timeout, transport=transport, follow_redirects=False
-    ) as client:
-
+    async with httpx.AsyncClient(timeout=timeout, transport=transport, follow_redirects=False) as client:
         async def limited(case: Case) -> Result:
             async with semaphore:
-                return await execute_case(case, client)
-
+                return await execute_case(case, client, contract)
         return await asyncio.gather(*(limited(case) for case in cases))

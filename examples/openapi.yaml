@@ -1,0 +1,31 @@
+openapi: 3.1.0
+info:
+  title: ReqForge Example API
+  version: 1.0.0
+paths:
+  /get:
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /post:
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [json]
+                properties:
+                  json:
+                    type: object
+                    required: [project]
+                    properties:
+                      project:
+                        type: string
