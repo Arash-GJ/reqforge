@@ -1,6 +1,7 @@
 import httpx
 import pytest
-from reqforge.core import Case, load_suite, run_suite, nested_value
+
+from reqforge.core import Case, load_suite, nested_value, run_suite
 from reqforge.reporting import save_report
 
 

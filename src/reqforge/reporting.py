@@ -2,7 +2,8 @@
 import json
 from dataclasses import asdict
 from pathlib import Path
-from xml.etree.ElementTree import Element, SubElement, ElementTree
+from xml.etree.ElementTree import Element, ElementTree, SubElement
+
 from .core import Result
 
 

@@ -2,7 +2,6 @@
 import asyncio
 import json
 from pathlib import Path
-from typing import Optional
 
 import httpx
 import typer
@@ -27,8 +26,8 @@ def version() -> None:
 def send(
     method: str = typer.Argument(..., help="HTTP method"),
     url: str = typer.Argument(..., help="Absolute HTTP(S) URL"),
-    header: Optional[list[str]] = typer.Option(None, "--header", "-H", help="Header: Name: Value"),
-    body: Optional[str] = typer.Option(None, "--json", help="JSON request body"),
+    header: list[str] | None = typer.Option(None, "--header", "-H", help="Header: Name: Value"),
+    body: str | None = typer.Option(None, "--json", help="JSON request body"),
     timeout: float = typer.Option(15.0, min=0.1),
 ) -> None:
     """Send one HTTP request and print its response."""
@@ -61,7 +60,7 @@ def run(
     suite: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
     parallel: int = typer.Option(5, min=1, max=100),
     timeout: float = typer.Option(15.0, min=0.1),
-    report: Optional[Path] = typer.Option(None, help="Report output path"),
+    report: Path | None = typer.Option(None, help="Report output path"),
     format: str = typer.Option("json", help="Report format: json or junit"),
 ) -> None:
     """Execute YAML API tests and return a CI-friendly exit code."""
