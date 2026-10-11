@@ -4,6 +4,7 @@ import asyncio
 import json
 from pathlib import Path
 from typing import Annotated
+
 import httpx
 import typer
 from rich.console import Console
