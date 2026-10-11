@@ -1,0 +1,13 @@
+tests:
+  - name: HTTPBin GET
+    method: GET
+    url: https://httpbin.org/get
+    expect_status: 200
+  - name: HTTPBin POST
+    method: POST
+    url: https://httpbin.org/post
+    json:
+      project: ReqForge
+    expect_status: 200
+    expect_json:
+      json.project: ReqForge
